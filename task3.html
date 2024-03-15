@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joy's Café Search</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="searchBox" placeholder="Search cafes...">
+    <table id="cafeTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Street No</th>
+                <th>Locality</th>
+                <th>Postal Code</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchBox = document.getElementById("searchBox");
+            const cafeTableBody = document.querySelector("#cafeTable tbody");
+
+            // Fetch cafes data from API endpoint
+            fetchCafes();
+
+            // Fetch cafes data from API endpoint
+            function fetchCafes() {
+                fetch("cafes_endpoint_url")
+                    .then(response => response.json())
+                    .then(data => {
+                        renderCafes(data);
+                        // Attach event listener for search box
+                        searchBox.addEventListener("input", handleSearch);
+                    })
+                    .catch(error => console.error("Error fetching cafes:", error));
+            }
+
+            // Render cafes data in the table
+            function renderCafes(cafes) {
+                cafeTableBody.innerHTML = "";
+                cafes.forEach(cafe => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${cafe.name}</td>
+                        <td>${cafe.street_no}</td>
+                        <td>${cafe.locality}</td>
+                        <td>${cafe.postal_code}</td>
+                        <td>${cafe.lat}</td>
+                        <td>${cafe.long}</td>
+                    `;
+                    cafeTableBody.appendChild(row);
+                });
+            }
+
+            // Handle search functionality
+            function handleSearch() {
+                const searchTerm = searchBox.value.trim().toLowerCase();
+                if (!searchTerm) {
+                    fetchCafes(); // If search box is empty, fetch all cafes
+                    return;
+                }
+
+                // Fetch cafes data from API endpoint and filter based on search term
+                fetch("cafes_endpoint_url")
+                    .then(response => response.json())
+                    .then(data => {
+                        const filteredCafes = data.filter(cafe => cafe.name.toLowerCase().includes(searchTerm));
+                        renderCafes(filteredCafes);
+                    })
+                    .catch(error => console.error("Error fetching cafes:", error));
+            }
+        });
+    </script>
+</body>
+</html>
